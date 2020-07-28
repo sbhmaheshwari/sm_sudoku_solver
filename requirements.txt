@@ -96,9 +96,6 @@ python-dateutil==2.8.1
 python-jsonrpc-server==0.3.4
 python-language-server==0.34.1
 pytz==2020.1
-pywin32==228
-pywin32-ctypes==0.2.0
-pywinpty==0.5.7
 PyYAML==5.3.1
 pyzmq==19.0.1
 QDarkStyle==2.8.1
