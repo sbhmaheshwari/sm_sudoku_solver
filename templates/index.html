@@ -7,18 +7,11 @@
     <title>Sudoku Solver</title>
   </head>
   <body>
-    <h1>Pi Video Surveillance</h1>
+    <h1>Sudoku Solver</h1>
     <h2>Show a sudoku to your camera to see it solved!</h2>
     <div class="container">
-      <div class="video-container"> 
-	<b>Solved!</b>
-        <img src="{{ url_for('video_feed') }}">
-      </div>
-      <div class="video-container"> 
-	<b>Camera</b>
-        <img src="{{ url_for('video_feed2') }}">
-      </div>
+        <img title = "Solved!" src="{{ url_for('video_feed2') }}">
+	<img tile = "Camera" src="{{ url_for('video_feed') }}">
     </div>
-    
   </body>
 </html>

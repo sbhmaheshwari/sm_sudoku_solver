@@ -7,6 +7,7 @@ from imutils.video import VideoStream
 import time
 import threading
 import tensorflow as tf
+import numpy as np
 
 outputFrame = None
 #frame_out = None
