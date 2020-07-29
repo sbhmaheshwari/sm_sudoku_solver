@@ -1,3 +1,4 @@
+'''refer to https://medium.com/activating-robotic-minds/peter-norvigs-sudoku-solver-25779bb349ce'''
 
 def cross(a, b):
   return([i+j for i in a for j in b])
@@ -10,6 +11,7 @@ unitlist = ([cross(rows, c) for c in cols]+
             [cross(i, j) for i in ('ABC', 'DEF', 'GHI') for j in ('123', '456', '789')])
 units = {s: [v for v in unitlist if s in v] for s in squares}
 peers = {s: set(sum(units[s], []))-set([s]) for s in squares}
+
 def test():
     "A set of unit tests."
     assert len(squares) == 81
@@ -26,79 +28,26 @@ def test():
        'A1', 'A3', 'B1', 'B3'])
     print('All tests pass.')
 #test()
-def display_grid(grid, coords=False):
-	"""
-	Displays a 9x9 soduku grid in a nicely formatted way.
-	Args:
-		grid (str|dict|list): A string representing a Sudoku grid. Valid characters are digits from 1-9 and empty squares are
-			specified by 0 or . only. Any other characters are ignored. A `ValueError` will be raised if the input does
-			not specify exactly 81 valid grid positions.
-			Can accept a dictionary where each key is the position on the board from A1 to I9.
-			Can accept a list of strings or integers with empty squares represented by 0.
-		coords (bool): Optionally prints the coordinate labels.
-	Returns:
-		str: Formatted depiction of a 9x9 soduku grid.
-	"""
-	if grid is None or grid is False:
-		return None
 
-	all_rows = 'ABCDEFGHI'
-	all_cols = '123456789'
-	null_chars = '0.'
-
-	if type(grid) == str:
-		grid = parse_puzzle(grid)
-	elif type(grid) == list:
-		grid = parse_puzzle(''.join([str(el) for el in grid]))
-
-	width = max([3, max([len(grid[pos]) for pos in grid]) + 1])
-	display = ''
-
-	if coords:
-		display += '   ' + ''.join([all_cols[i].center(width) for i in range(3)]) + '|'
-		display += ''.join([all_cols[i].center(width) for i in range(3, 6)]) + '|'
-		display += ''.join([all_cols[i].center(width) for i in range(6, 9)]) + '\n   '
-		display += '--' + ''.join(['-' for x in range(width * 9)]) + '\n'
-
-	row_counter = 0
-	col_counter = 0
-	for row in all_rows:
-		if coords:
-			display += all_rows[row_counter] + ' |'
-		row_counter += 1
-		for col in all_cols:
-			col_counter += 1
-			if grid[row + col] in null_chars:
-				grid[row + col] = '.'
-
-			display += ('%s' % grid[row + col]).center(width)
-			if col_counter % 3 == 0 and col_counter % 9 != 0:
-				display += '|'
-			if col_counter % 9 == 0:
-				display += '\n'
-		if row_counter % 3 == 0 and row_counter != 9:
-			if coords:
-				display += '  |'
-			display += '+'.join([''.join(['-' for x in range(width * 3)]) for y in range(3)]) + '\n'
-
-	print(display)
-	return display
 def grid_values(grid):
   vals = [c for c in grid if c in digits or c in '0.']
   assert len(vals) == 81
   return(dict(zip(squares, vals)))
+
 def parse_grid(grid):
   values = {s: digits for s in squares}
   for s, d in grid_values(grid).items():
     if d in digits and not assign(values, s, d):
       return(False)
   return(values)
+
 def assign(values, s, d):
   othervals = values[s].replace(d, '')
   if all(eliminate(values, s, vals) for vals in othervals):
     return(values)
   else:
     return(False) 
+
 def eliminate(values, s, d):
   if d not in values[s]:
     return(values)
@@ -116,8 +65,10 @@ def eliminate(values, s, d):
       if not assign(values, dplaces[0], d):
         return(False)
   return(values)
+
 def solve(grid):
   return(search(parse_grid(grid)))
+
 def search(values):
   if values is False:
     return False

@@ -7,17 +7,14 @@ from imutils.video import VideoStream
 import time
 import threading
 import tensorflow as tf
-import numpy as np
 
 outputFrame = None
-#frame_out = None
 lock = threading.Lock()
 
 app = Flask(__name__)
 
 model_ch4 = tf.keras.models.load_model('model_ch4.hdf5')
 vs = cv2.VideoCapture(0)
-#vs = VideoStream(src=0).start(0)
 time.sleep(2.0)
 
 
@@ -25,25 +22,26 @@ time.sleep(2.0)
 def index():
     return(render_template('index.html'))
 
+
 def put_text(warp_img, num, coords, font = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 1, color = (255, 0, 0), thickness = 2):
+    '''put text on the image'''
     img = warp_img.copy()
     x, y = coords
     x, y = int(x), int(y)
     m_img = cv2.putText(img, str(num), (x,y), font, fontScale, color, thickness)
     return(m_img)
 
+# this function runs in background and updates outputFrame 
 def get_solved_sudoku():
-    global vs, outputFrame, lock#, frame_out
+    global vs, outputFrame, lock
     val_init = {}
     while True:
-        #start = time.time()
         _, frame = vs.read()
         img_r = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         processed_img = preprocess_image(img_r)
         req_points = get_corners(processed_img)
         warped_image = get_warped(img_r, req_points)
         squares = infer_grid(warped_image)
-        #frame_out = imutils.resize(frame.copy(), width=400)
         try:
             sud_digits = get_sudoku(img = frame)
             sum_digits = sum([np.sum(i) for i in sud_digits])
@@ -73,14 +71,8 @@ def get_solved_sudoku():
                             outputFrame = fin_img.copy()
         except:
             continue
-        #outputFrame = frame.copy()
-        #print(time.time()-start)
 
-'''def show_camera():
-    global frame_out
-    while True:
-        _, frame_out = vs.read()'''
-
+# Decorator for displaying sudoku image        
 def generate():
     global lock, outputFrame
     while True:
@@ -89,10 +81,10 @@ def generate():
             (flag, encodedImage) = cv2.imencode(".jpg", outputFrame)
             if not flag: continue
             yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n')
-            
+
+# Decorator for displaying real time camera image            
 def generate2():
-    #show_camera()
-    global lock#, frame_out
+    global lock
     while True:
         _, frame_out = vs.read()
         if frame_out is None: continue
@@ -120,8 +112,6 @@ if __name__ == '__main__':
     print('started')
     app.run(host='localhost', port=9000, debug=True,
 		threaded=True, use_reloader=False)
-    #from werkzeug.serving import run_simple
-    #run_simple('localhost', 9000, app, use_debugger=True, threaded=True, use_reloader = False)
 
 vs.release()
 cv2.destroyAllWindows()

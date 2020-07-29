@@ -1,7 +1,9 @@
+'''refer to https://medium.com/@neshpatel/solving-sudoku-part-ii-9a7019d196a2'''
+
 import cv2
 import numpy as np
 import operator
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 def distance_between(p1, p2):
   return(np.sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2))
@@ -18,6 +20,7 @@ def preprocess_image(img, skip_dilate=False):
   return(proc)
 
 def get_corners(img):
+  '''get corners of the largest rectangular area'''
   ext_contours, hier = cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
   sortedContours = sorted(ext_contours, key = cv2.contourArea, reverse=True)
   polygon = sortedContours[0]
@@ -29,6 +32,7 @@ def get_corners(img):
   return(req_points)
 
 def get_warped(img, req_points):
+  '''get the warped image using the required corner points'''
   bottom_right, bottom_left, top_left, top_right = req_points
   src = np.array([bottom_right, bottom_left, top_left, top_right], dtype='float32')
   side = max([distance_between(bottom_right, bottom_left),
@@ -41,6 +45,7 @@ def get_warped(img, req_points):
   return(warped_image)
 
 def infer_grid(img):
+  '''divide the image into 9*9 grid'''
   squares = []
   side = img.shape[0]/9
   for j in range(9):
@@ -55,6 +60,7 @@ def cut_from_rect(img, rect):
 	return img[int(rect[0][1]):int(rect[1][1]), int(rect[0][0]):int(rect[1][0])]
 
 def get_digits(warped_img, squares, size = 28):
+  '''get digits from squares to be used for classification next'''
   digits = []
   for square in squares:
     rect = cut_from_rect(warped_img.copy(), square)
@@ -62,6 +68,7 @@ def get_digits(warped_img, squares, size = 28):
   return(digits)
 
 def extract_features(rect, size = None):
+  '''get the padded digits after extracting them using the largest feature function'''
   height, width = rect.shape
   margin = int((height+width)/2/2.5)
   topl = [margin, margin]
@@ -78,6 +85,7 @@ def extract_features(rect, size = None):
   return(imp_digit_pad)
 
 def get_pad(imp_digit, size = 28, margin = 0, background = 0):
+  '''pad the imp_digit'''
   height, width = imp_digit.shape
   
   def center_pad(length):
@@ -105,6 +113,7 @@ def get_pad(imp_digit, size = 28, margin = 0, background = 0):
   return(imp_digit)
 
 def find_largest_feature(rect, topl = None, bottomr = None):
+  ''' extract the feature that has the largest area, supposedly the digits in a square'''
   height, width = rect.shape
   img = rect.copy()
   if topl is None:
@@ -145,7 +154,7 @@ def find_largest_feature(rect, topl = None, bottomr = None):
   return(np.array(bbox, dtype = 'float32'))
   
 def get_sudoku(img = [], img_path = None):
-  
+  '''given numpy image or im_path, get the sudoku as a list'''
   img_r = None
   if img_path is not None:
     img_r = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
@@ -165,6 +174,7 @@ def get_sudoku(img = [], img_path = None):
   return(digits)
 
 def plot_many_images(images, titles, rows=1, columns=2):
+  '''plot multiple images'''
   plt.figure(figsize=(12,12))
   for i, image in enumerate(images):
     plt.subplot(rows, columns, i+1)
@@ -172,6 +182,7 @@ def plot_many_images(images, titles, rows=1, columns=2):
     plt.title(titles[i])
     plt.xticks([]), plt.yticks([])  # Hide tick marks
   plt.show()
+
 def display_points(in_img, points, radius=5, colour=(0, 0, 255)):
 	"""Draws circular points on an image."""
 	img = in_img.copy()
@@ -188,6 +199,7 @@ def display_points(in_img, points, radius=5, colour=(0, 0, 255)):
 	plt.imshow(img, 'gray')
 	return img
 def display_rects(in_img, rects, colour=(0, 0, 255)):
+  '''display rectangles on the image'''
   img = in_img.copy()
   if len(colour) == 3:
     if len(img.shape) == 2:
@@ -198,6 +210,7 @@ def display_rects(in_img, rects, colour=(0, 0, 255)):
     img = cv2.rectangle(img, tuple(int(x) for x in rect[0]), tuple(int(x) for x in rect[1]), colour)
   plt.imshow(img)
   return img
+
 def show_digits(digits, colour=255):
 	"""Shows list of 81 extracted digits in a grid format"""
 	rows = []
