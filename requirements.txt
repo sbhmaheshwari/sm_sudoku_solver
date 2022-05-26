@@ -2,5 +2,5 @@ Flask==1.1.2
 imutils==0.5.3
 numpy==1.18.5
 opencv-contrib-python==4.3.0.36
-tensorflow-cpu==2.1.0
+tensorflow-cpu==2.7.2
 gunicorn==19.9.0
